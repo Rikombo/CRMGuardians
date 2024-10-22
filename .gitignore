@@ -1,0 +1,17 @@
+# Salesforce specific
+.sfdx
+.org_def.json
+.DS_Store
+*.scratch-def.json
+*.json
+*.log
+
+# IDE specific
+.vscode
+.idea
+
+# Node modules
+node_modules
+
+# MacOS specific
+.DS_Store

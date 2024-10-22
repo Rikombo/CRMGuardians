@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="Clinic Dashboard" icon-name="standard:dashboard">
+        <!-- Tabs for Sections -->
+        <lightning-tabset class="slds-m-around_medium" active-tab-value="appointments">
+            <!-- Appointments Tab -->
+            <lightning-tab label="Appointments" icon-name="standard:event" value="appointments">
+                <c-appointment-list></c-appointment-list>
+            </lightning-tab>
+
+            <!-- Doctors Tab -->
+            <lightning-tab label="Doctors" icon-name="standard:user" value="doctors">
+                <c-doctor-list></c-doctor-list>
+            </lightning-tab>
+
+            <!-- Patients Tab -->
+            <lightning-tab label="Patients" icon-name="standard:contact" value="patients">
+                <c-patient-list></c-patient-list>
+            </lightning-tab>
+        </lightning-tabset>
+    </lightning-card>
+</template>

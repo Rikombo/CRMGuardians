@@ -1,0 +1,119 @@
+<template>
+    <lightning-card title="Create New Appointment">
+        <div class="slds-p-around_medium">
+            <!-- Patient Autocomplete Field -->
+            <template if:false={selectedPatientId}>
+                <lightning-input
+                    type="text"
+                    label="Patient"
+                    value={patientInput}
+                    onchange={handlePatientInputChange}
+                    onkeyup={handlePatientInputKeyUp}
+                    placeholder="Enter patient email or name"
+                    required>
+                </lightning-input>
+                <template if:true={isPatientLoading}>
+                    <lightning-spinner size="small" alternative-text="Loading patients"></lightning-spinner>
+                </template>
+                <template if:true={patientOptions.length}>
+                    <lightning-combobox
+                        name="patient"
+                        label="Select Patient"
+                        value={selectedPatientId}
+                        options={patientOptions}
+                        onchange={handlePatientSelect}
+                        placeholder="Choose a patient"
+                        required>
+                    </lightning-combobox>
+                </template>
+            </template>
+            <template if:true={selectedPatientId}>
+                <div class="selected-field">
+                    <strong>Selected Patient:</strong> {patientInput}
+                </div>
+            </template>
+
+            <!-- Doctor Autocomplete Field -->
+            <template if:false={selectedDoctorId}>
+                <lightning-input
+                    type="text"
+                    label="Doctor"
+                    value={doctorInput}
+                    onchange={handleDoctorInputChange}
+                    onkeyup={handleDoctorInputKeyUp}
+                    placeholder="Enter doctor name"
+                    required>
+                </lightning-input>
+                <template if:true={isDoctorLoading}>
+                    <lightning-spinner size="small" alternative-text="Loading doctors"></lightning-spinner>
+                </template>
+                <template if:true={doctorOptions.length}>
+                    <lightning-combobox
+                        name="doctor"
+                        label="Select Doctor"
+                        value={selectedDoctorId}
+                        options={doctorOptions}
+                        onchange={handleDoctorSelect}
+                        placeholder="Choose a doctor"
+                        required>
+                    </lightning-combobox>
+                </template>
+            </template>
+            <template if:true={selectedDoctorId}>
+                <div class="selected-field">
+                    <strong>Selected Doctor:</strong> {doctorInput}
+                </div>
+            </template>
+
+            <!-- Appointment Date & Time Picker -->
+            <lightning-input
+                type="datetime-local"
+                label="Appointment Date & Time"
+                value={appointmentDateTime}
+                onchange={handleAppointmentDateTimeChange}
+                min={minDateTime}
+                required>
+            </lightning-input>
+
+            <!-- Service Selection -->
+            <lightning-combobox
+                name="service"
+                label="Service"
+                value={selectedServiceId}
+                options={serviceOptions}
+                onchange={handleServiceChange}
+                placeholder="Select a service"
+                required>
+            </lightning-combobox>
+
+            <!-- Reasons for Visit Selection -->
+            <lightning-combobox
+                name="reason"
+                label="Reasons for Visit"
+                value={selectedReason}
+                options={reasonOptions}
+                onchange={handleReasonChange}
+                placeholder="Select a reason"
+                required>
+            </lightning-combobox>
+
+            <!-- Additional Padding After Reasons for Visit -->
+            <div class="additional-padding"></div>
+
+            <!-- Submit and Reset Buttons -->
+            <div class="button-container">
+                <lightning-button
+                    label="Submit"
+                    variant="brand"
+                    onclick={handleSubmit}
+                    class="slds-m-right_small">
+                </lightning-button>
+                <lightning-button
+                    label="Reset"
+                    variant="neutral"
+                    onclick={handleReset}>
+                </lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+</template>

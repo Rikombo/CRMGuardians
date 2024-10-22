@@ -1,0 +1,42 @@
+/* Scoped CSS for newAppointmentForm component */
+:host {
+    display: block;
+}
+
+.slds-p-around_medium {
+    display: flex;
+    flex-direction: column;
+}
+
+.lightning-input,
+.lightning-combobox {
+    margin-bottom: 1rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 1rem;
+}
+
+.lightning-button {
+    width: 100px;
+}
+
+.lightning-spinner {
+    margin-bottom: 1rem;
+}
+
+.selected-field {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    padding: 0.5rem;
+    background-color: #f4f6f9;
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+}
+
+.additional-padding {
+    height: 20rem;
+
+}

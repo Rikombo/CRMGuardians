@@ -1,0 +1,17 @@
+/* Adjust table header styling */
+.slds-table thead th {
+    background-color: #f3f2f2;
+    font-weight: bold;
+}
+
+/* Adjust table cell padding */
+.slds-table td {
+    padding: 0.75rem;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    .slds-table {
+        font-size: 0.85rem;
+    }
+}

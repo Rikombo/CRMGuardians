@@ -1,0 +1,24 @@
+/* Enhance table header */
+.slds-table th {
+    background-color: #f3f2f2;
+    font-weight: bold;
+    border-bottom: 1px solid #d8dde6;
+}
+
+/* Enhance table cells */
+.slds-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #d8dde6;
+}
+
+/* Add vertical borders between columns */
+.slds-table_fixed-layout td+td {
+    border-left: 1px solid #d8dde6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .slds-table {
+        font-size: 0.85rem;
+    }
+}

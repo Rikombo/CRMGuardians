@@ -1,0 +1,43 @@
+.container {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.slds-table th {
+    background-color: #f3f2f2;
+    font-weight: bold;
+    border-bottom: 1px solid #d8dde6;
+    text-align: left;
+    padding: 0.75rem;
+}
+
+.slds-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #d8dde6;
+}
+
+.slds-table_fixed-layout td+td {
+    border-left: 1px solid #d8dde6;
+}
+
+.slds-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+
+@media (max-width: 768px) {
+    .slds-table {
+        font-size: 0.85rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    .search-section {
+        flex-direction: column;
+    }
+}

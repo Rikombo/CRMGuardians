@@ -1,0 +1,67 @@
+<template>
+    <div class="container slds-p-around_medium slds-p-bottom_large">
+        <!-- Search Inputs -->
+        <div class="slds-grid slds-wrap search-section slds-m-bottom_medium">
+            <!-- Patient Name Input -->
+            <div class="slds-col slds-size_1-of-2 slds-p-right_small slds-m-bottom_small">
+                <lightning-input 
+                    label="Patient Name" 
+                    name="patientName" 
+                    value={patientName} 
+                    onchange={handleInputChange}>
+                </lightning-input>
+            </div>
+            <!-- Appointment Date Input -->
+            <div class="slds-col slds-size_1-of-2 slds-p-left_small slds-m-bottom_small">
+                <lightning-input 
+                    label="Appointment Date" 
+                    name="appointmentDate" 
+                    type="date" 
+                    value={appointmentDate} 
+                    onchange={handleInputChange}>
+                </lightning-input>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group slds-grid slds-grid_align-end slds-m-bottom_medium">
+            <lightning-button 
+                label="Today" 
+                onclick={handleTodayClick}
+                class="slds-m-left_small">
+            </lightning-button>
+            <lightning-button 
+                label="All" 
+                onclick={handleShowAll}
+                class="slds-m-left_small">
+            </lightning-button>
+            <lightning-button 
+                label="Search" 
+                variant="brand" 
+                onclick={handleSearch}
+                class="slds-m-left_small">
+            </lightning-button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-spinner">
+                <lightning-spinner alternative-text="Loading"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error Message -->
+        <template if:true={error}>
+            <div class="error-message">{error}</div>
+        </template>
+
+        <!-- Appointments Table -->
+        <lightning-datatable
+            key-field="Id"
+            data={appointments}
+            columns={columns}
+            hide-checkbox-column
+            class="slds-m-top_medium slds-table_bordered">
+        </lightning-datatable>
+    </div>
+</template>

@@ -4,14 +4,17 @@ import searchDoctors from '@salesforce/apex/NewAppointmentController.searchDocto
 import getServices from '@salesforce/apex/NewAppointmentController.getServices';
 import getReasonsForVisit from '@salesforce/apex/NewAppointmentController.getReasonsForVisit';
 import createAppointment from '@salesforce/apex/NewAppointmentController.createAppointment';
+import checkAppointmentAvailability from '@salesforce/apex/NewAppointmentController.checkAppointmentAvailability';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class NewAppointmentForm extends LightningElement {
     // Form Fields
     @track patientInput = '';
     @track selectedPatientId = '';
+    @track selectedPatientLabel = '';
     @track doctorInput = '';
     @track selectedDoctorId = '';
+    @track selectedDoctorLabel = '';
     @track appointmentDateTime = '';
     @track selectedServiceId = '';
     @track selectedReason = '';
@@ -31,6 +34,9 @@ export default class NewAppointmentForm extends LightningElement {
     // Debounce Timers
     patientDebounceTimer;
     doctorDebounceTimer;
+
+    // Error Message for Appointment Time
+    @track appointmentTimeError = '';
 
     // Minimum DateTime (current date & time)
     get minDateTime() {
@@ -69,7 +75,7 @@ export default class NewAppointmentForm extends LightningElement {
             .then(result => {
                 this.reasonOptions = result.map(reason => ({
                     label: reason.label,
-                    value: reason.label
+                    value: reason.value // Use reason.value instead of reason.label
                 }));
                 this.isReasonLoading = false;
             })
@@ -83,6 +89,7 @@ export default class NewAppointmentForm extends LightningElement {
     handlePatientInputChange(event) {
         this.patientInput = event.target.value;
         this.selectedPatientId = '';
+        this.selectedPatientLabel = '';
         this.patientOptions = [];
     }
 
@@ -109,16 +116,19 @@ export default class NewAppointmentForm extends LightningElement {
         } else {
             this.patientOptions = [];
             this.selectedPatientId = '';
+            this.selectedPatientLabel = '';
         }
     }
 
     // Handle Patient Selection
     handlePatientSelect(event) {
         this.selectedPatientId = event.detail.value;
-        // Set patientInput based on selection for display
+        // Set selectedPatientLabel based on selection for display
         const selectedOption = this.patientOptions.find(option => option.value === this.selectedPatientId);
         if(selectedOption) {
-            this.patientInput = selectedOption.label;
+            this.selectedPatientLabel = selectedOption.label;
+            this.patientInput = ''; // Clear the input field
+            this.patientOptions = []; // Clear options after selection
         }
     }
 
@@ -126,6 +136,7 @@ export default class NewAppointmentForm extends LightningElement {
     handleDoctorInputChange(event) {
         this.doctorInput = event.target.value;
         this.selectedDoctorId = '';
+        this.selectedDoctorLabel = '';
         this.doctorOptions = [];
     }
 
@@ -152,22 +163,26 @@ export default class NewAppointmentForm extends LightningElement {
         } else {
             this.doctorOptions = [];
             this.selectedDoctorId = '';
+            this.selectedDoctorLabel = '';
         }
     }
 
     // Handle Doctor Selection
     handleDoctorSelect(event) {
         this.selectedDoctorId = event.detail.value;
-        // Set doctorInput based on selection for display
+        // Set selectedDoctorLabel based on selection for display
         const selectedOption = this.doctorOptions.find(option => option.value === this.selectedDoctorId);
         if(selectedOption) {
-            this.doctorInput = selectedOption.label;
+            this.selectedDoctorLabel = selectedOption.label;
+            this.doctorInput = ''; // Clear the input field
+            this.doctorOptions = []; // Clear options after selection
         }
     }
 
     // Handle Appointment Date & Time Change
     handleAppointmentDateTimeChange(event) {
         this.appointmentDateTime = event.target.value;
+        this.validateAppointmentTime();
     }
 
     // Handle Service Change
@@ -183,20 +198,35 @@ export default class NewAppointmentForm extends LightningElement {
     // Handle Form Submission
     handleSubmit() {
         if (this.isFormValid()) {
-            createAppointment({
-                patientId: this.selectedPatientId,
+            // Before creating the appointment, check for availability
+            checkAppointmentAvailability({
                 doctorId: this.selectedDoctorId,
-                appointmentDateTimeStr: this.convertToGMT(this.appointmentDateTime),
-                serviceId: this.selectedServiceId,
-                reasonForVisit: this.selectedReason
+                appointmentDateTimeStr: this.convertToGMT(this.appointmentDateTime)
             })
-                .then(() => {
-                    this.showToast('Success', 'Appointment created successfully.', 'success');
-                    this.resetForm();
-                })
-                .catch(error => {
-                    this.showToast('Error', error.body.message, 'error');
-                });
+            .then(isAvailable => {
+                if (isAvailable) {
+                    // Proceed to create the appointment
+                    createAppointment({
+                        patientId: this.selectedPatientId,
+                        doctorId: this.selectedDoctorId,
+                        appointmentDateTimeStr: this.convertToGMT(this.appointmentDateTime),
+                        serviceId: this.selectedServiceId,
+                        reasonForVisit: this.selectedReason
+                    })
+                    .then(() => {
+                        this.showToast('Success', 'Appointment created successfully.', 'success');
+                        this.resetForm();
+                    })
+                    .catch(error => {
+                        this.showToast('Error', error.body.message, 'error');
+                    });
+                } else {
+                    this.showToast('Error', 'The selected time slot is no longer available.', 'error');
+                }
+            })
+            .catch(error => {
+                this.showToast('Error', 'An error occurred while checking appointment availability: ' + error.body.message, 'error');
+            });
         }
     }
 
@@ -205,13 +235,16 @@ export default class NewAppointmentForm extends LightningElement {
         this.resetForm();
     }
 
-    // Convert Local DateTime to GMT+2 String in 'YYYY-MM-DD HH:MM:SS' format
+    // Convert Local DateTime to GMT String in 'YYYY-MM-DD HH:mm:ss' format
     convertToGMT(localDateTimeStr) {
         const localDate = new Date(localDateTimeStr);
-        // Add 2 hours to the local time to align with GMT+2
-        localDate.setHours(localDate.getHours() + 2);
-        // Convert to ISO string and format it
-        return localDate.toISOString().slice(0, 19).replace('T', ' ');
+        const year = localDate.getUTCFullYear();
+        const month = ('0' + (localDate.getUTCMonth() + 1)).slice(-2);
+        const day = ('0' + localDate.getUTCDate()).slice(-2);
+        const hours = ('0' + localDate.getUTCHours()).slice(-2);
+        const minutes = ('0' + localDate.getUTCMinutes()).slice(-2);
+        const seconds = ('0' + localDate.getUTCSeconds()).slice(-2);
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     // Validate Form Fields
@@ -236,6 +269,10 @@ export default class NewAppointmentForm extends LightningElement {
             this.showToast('Error', 'Please select an appointment date and time.', 'error');
             isValid = false;
         }
+        if (this.appointmentTimeError) {
+            this.showToast('Error', this.appointmentTimeError, 'error');
+            isValid = false;
+        }
         if (!this.selectedServiceId) {
             this.showToast('Error', 'Please select a service.', 'error');
             isValid = false;
@@ -251,13 +288,16 @@ export default class NewAppointmentForm extends LightningElement {
     resetForm() {
         this.patientInput = '';
         this.selectedPatientId = '';
+        this.selectedPatientLabel = '';
         this.doctorInput = '';
         this.selectedDoctorId = '';
+        this.selectedDoctorLabel = '';
         this.appointmentDateTime = '';
         this.selectedServiceId = '';
         this.selectedReason = '';
         this.patientOptions = [];
         this.doctorOptions = [];
+        this.appointmentTimeError = '';
     }
 
     // Show Toast Notifications
@@ -268,5 +308,22 @@ export default class NewAppointmentForm extends LightningElement {
             variant,
         });
         this.dispatchEvent(evt);
+    }
+
+    // Validate Appointment Time (9 AM - 5 PM GMT)
+    validateAppointmentTime() {
+        if (!this.appointmentDateTime) {
+            this.appointmentTimeError = '';
+            return;
+        }
+
+        const selectedDate = new Date(this.appointmentDateTime);
+        const hours = selectedDate.getUTCHours(); // Using UTC hours since Apex handles GMT
+
+        if (hours < 9 || hours >= 17) {
+            this.appointmentTimeError = 'Appointments can only be scheduled between 9 AM and 5 PM GMT.';
+        } else {
+            this.appointmentTimeError = '';
+        }
     }
 }

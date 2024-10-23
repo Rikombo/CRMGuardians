@@ -217,4 +217,7 @@ public with sharing class ClinicDashboardController {
 
         return patients;
     }
+
+
+
 }
